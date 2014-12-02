@@ -29,6 +29,10 @@ class TestSvnService extends SvnService {
     def TestSvnService() {
     }
 
+    def TestSvnService(String regex) {
+        super(regex)
+    }
+
     def SVNURL getSCMRemoteURL() {
         return SVNURL.parseURIEncoded(remoteURL)
     }

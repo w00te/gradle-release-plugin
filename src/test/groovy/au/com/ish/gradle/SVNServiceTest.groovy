@@ -17,14 +17,6 @@
 package au.com.ish.gradle
 
 import org.junit.Test
-import static org.junit.Assert.*
-
-import org.gradle.testfixtures.ProjectBuilder
-
-import au.com.ish.gradle.*
-
-import groovy.mock.interceptor.*
-import org.tmatesoft.svn.core.SVNException
 
 class SvnServiceTest {    
 
@@ -52,6 +44,30 @@ class SvnServiceTest {
         service.setSCMRemoteURL("http://svn.ish.com.au/ish/angel/branches/stable")
         assert service.onTag() == false
         assert service.getBranchName() == "stable"
+    }
+
+    // tests parsing the url with 'branches' with regex and standard url.
+    @Test
+    public void testOnBranchWithRegexAndStandardUrl() {
+        TestSvnService service = new TestSvnService()
+        service.setSCMRemoteURL("https://sami.repo.com/svn/project_name/branches/1.9.1/")
+        assert service.getBranchName() == "1.9.1"
+        service.setSCMRemoteURL("https://sami.repo.com/svn/project_name/branches/1.9.1")
+        assert service.getBranchName() == "1.9.1"
+        service.setSCMRemoteURL("https://sami.repo.com/svn/project_name/branches/1.9.1/trunk")
+        assert service.getBranchName() == "trunk"
+        service.setSCMRemoteURL("https://sami.repo.com/svn/project_name/branches/1.9.1/trunk/")
+        assert service.getBranchName() == "trunk"
+    }
+
+    // tests parsing the url with 'branches' with regex and nonstandard url.
+    @Test
+    public void testOnBranchWithRegexAndNonstandardUrl() {
+        TestSvnService service = new TestSvnService(/.*\/(.*)\/bad_suffix\/?/)
+        service.setSCMRemoteURL("https://sami.repo.com/svn/project_name/branches/1.9.2/bad_suffix/")
+        assert service.getBranchName() == "1.9.2"
+        service.setSCMRemoteURL("https://sami.repo.com/svn/project_name/trunk/1.9.3/bad_suffix")
+        assert service.getBranchName() == "trunk"
     }
 
     // tests parsing the url with 'trunk'

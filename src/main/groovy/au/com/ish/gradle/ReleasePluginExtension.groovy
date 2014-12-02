@@ -29,6 +29,7 @@ class ReleasePluginExtension {
   private String password
   private boolean releaseDryRun = false
   private boolean allowLocalModifications = false
+  private String urlVersionExtractionPattern
 
   public ReleasePluginExtension(ReleasePlugin plugin) {
     this.plugin = plugin
@@ -139,4 +140,19 @@ class ReleasePluginExtension {
     return allowLocalModifications
   }
 
+  /*
+    Set the URL version extraction pattern - for example, can let you extract a version from the 2nd
+    to last section of the URL instead of the last section which is the default.
+  */
+  public setUrlVersionExtractionPattern(String urlVersionExtractionPattern) {
+      this.urlVersionExtractionPattern = urlVersionExtractionPattern;
+  }
+
+  /*
+    Get the URL version extraction pattern - for example, can let you extract a version from the 2nd
+    to last section of the URL instead of the last section which is the default.
+  */
+  public getUrlVersionExtractionPattern() {
+      return urlVersionExtractionPattern;
+  }
 }

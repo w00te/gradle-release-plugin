@@ -31,14 +31,26 @@ class SvnService extends SCMService {
     def private Project project
     def private SVNStatus wcStatus;
     def private svnClientManager
+    def private regex;
+    def private static DEFAULT_REGEX = /\/([^\/]+)\/?$/
 
     private SVNRepository svnRepo;
     
     SvnService() {
         //private constructor only used for tests
+        regex = DEFAULT_REGEX
+    }
+
+    SvnService(String regex) {
+        //private constructor only used for tests
+        this.regex = regex;
     }
 
     SvnService(Project project) {
+        this()
+
+        println 'The release pattern is: ' + project.extensions.release.urlVersionExtractionPattern
+
         this.project = project;
         project.logger.info("Creating SvnService for $project")
 
@@ -73,6 +85,12 @@ class SvnService extends SCMService {
         //not sure if the code below is required
         def svnRepo = SVNRepositoryFactory.create(wcStatus.getURL())
         svnRepo.setAuthenticationManager(authManager);
+
+        //Initialize the regex for finding branch and tag names based on the user's configuration.
+        if (project != null && project.extensions != null && project.extensions.release.urlVersionExtractionPattern != null) {
+            regex = project.extensions.release.urlVersionExtractionPattern
+            project.logger.info("Using user-provided branch & tag regex: " + regex)
+        }
     }
 
     def boolean scmCreditenialsProvided() {
@@ -126,24 +144,15 @@ class SvnService extends SCMService {
     def boolean onBranch() {
         return getSCMRemoteURL().getPath().contains("/branches/")
     }
-    
+
     def String getBranchName() {
-        List splitPath = Arrays.asList(getSCMRemoteURL().getPath().split("/"))
 
-        // if svn URL contains "/tags/", then find the name of the branch
-        if (onTag()) {
-            assert(splitPath.indexOf("tags") > 0)
-            assert(splitPath.indexOf("tags") < splitPath.size()-1)
-            return splitPath.get(splitPath.size()-1)
+        //Default regex gets last directory of branch or tag; just make sure the SCM URL is one of the two.
+        if (onTag() || onBranch()) {
+            def matcher = ( getSCMRemoteURL().getPath().toString() =~ regex )
+            return matcher[0][1];
         }
 
-        // if svn URL contains "/branches/", then find the name of the branch
-        if (onBranch()) {
-            assert(splitPath.indexOf("branches") > 0)
-            assert(splitPath.indexOf("branches") < splitPath.size()-1)
-            return splitPath.get(splitPath.size()-1)
-        }
-        
         return "trunk"
     }
 

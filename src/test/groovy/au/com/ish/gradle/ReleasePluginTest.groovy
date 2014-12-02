@@ -16,21 +16,10 @@
 
 package au.com.ish.gradle
 
-import org.gradle.api.Plugin
 import org.gradle.api.Project
-import org.gradle.api.Task
-import org.gradle.api.tasks.Exec;
-
 import org.junit.Test
 import org.junit.Before
-import static org.junit.Assert.*
-
 import org.gradle.testfixtures.ProjectBuilder
-
-import au.com.ish.gradle.*
-
-import groovy.mock.interceptor.*
-import org.tmatesoft.svn.core.SVNException
 
 class ReleasePluginTest {
 
@@ -49,6 +38,7 @@ class ReleasePluginTest {
 			project.apply plugin: 'release'
 			release {
 				scm = "test"
+                urlVersionExtractionPattern = 'http://base/branches/1.10/random_url/'
 			}
 			version = release.projectVersion
 		}
@@ -74,6 +64,11 @@ class ReleasePluginTest {
 		assert project.release.scmVersion == "abc"
 	}
 
+    @Test
+    public void checkUrlVersionExtractionPattern() {
+        assert project.release.urlVersionExtractionPattern == 'http://base/branches/1.10/random_url/'
+    }
+
 	//verifies if the exec env is available
 	@Test
 	public void testExec() {
@@ -87,5 +82,4 @@ class ReleasePluginTest {
             println stdout.toString()
         } 
 	}
-
 }
